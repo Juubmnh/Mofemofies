@@ -1,0 +1,107 @@
+﻿using Mofemofies.Data;
+using SkiaSharp;
+
+namespace Mofemofies;
+
+// Treated as an integer interval [StartFrame, EndFrame).
+public sealed class MofiEvent : MofiObject<IMofiDisplay>, IMofiDisplay, ICancelable, IDisposable
+{
+    internal Func<long, bool>? _finishPredicate;
+    public bool IsFinished { get; set; }
+
+    public void Dispose() => ClearComponents();
+
+    void IMofiDisplay.Load(long frame)
+    {
+        IsFinished = false;
+        foreach ((_, var component) in _components)
+        {
+            component.Load(frame);
+        }
+    }
+
+    void IMofiDisplay.Update(DisplayCallStack sender, long frame)
+    {
+        if (_finishPredicate(frame))
+        {
+            IsFinished = true;
+            return;
+        }
+
+        sender.Push(this);
+        foreach ((_, var component) in _components)
+        {
+            component.Update(sender, frame);
+        }
+    }
+
+    void IMofiDisplay.Render(SKCanvas canvas)
+    {
+        foreach ((_, var component) in _components)
+        {
+            component.Render(canvas);
+        }
+    }
+}
+
+public sealed class MofiEventFactory : MofiFactory<MofiEventFactory, MofiEvent>
+{
+    public static readonly MofiEventFactory MinValue = new(long.MinValue);
+    public static readonly MofiEventFactory MaxValue = new(long.MaxValue);
+
+    public long StartFrame { get; set; }
+    public ExLong EndFrame { get; set; }
+
+    public MofiEventFactory()
+    {
+        StartFrame = default;
+        EndFrame = ExLong.PositiveInfinity;
+    }
+
+    public MofiEventFactory(long startFrame, long? endFrame = null)
+    {
+        if (endFrame is not null && startFrame >= endFrame)
+        {
+            throw new ArgumentException($"{nameof(startFrame)} must be less than {nameof(endFrame)}.");
+        }
+
+        StartFrame = startFrame;
+        EndFrame = endFrame ?? ExLong.PositiveInfinity;
+    }
+
+    private MofiEventFactory(long startFrame, ExLong endFrame, Action<MofiEvent> creator)
+    {
+        if (startFrame >= endFrame)
+        {
+            throw new ArgumentException($"{nameof(startFrame)} must be less than {nameof(endFrame)}.");
+        }
+
+        StartFrame = startFrame;
+        EndFrame = endFrame;
+
+        _creator = creator;
+    }
+
+    public MofiEventFactory(long startFrame, long endFrame, Action<MofiEvent> creator)
+        : this(startFrame, (ExLong)endFrame, creator)
+    {
+
+    }
+
+    public MofiEventFactory(long startFrame, Action<MofiEvent> creator)
+        : this(startFrame, ExLong.PositiveInfinity, creator)
+    {
+
+    }
+
+    public static MofiEventFactory CreateInstant(long frame) => new(frame, frame + 1);
+
+    public void SetCreator(Action<MofiEvent> creator) => _creator = creator;
+
+    public override MofiEvent Create()
+    {
+        var newEvent = base.Create();
+        newEvent._finishPredicate = frame => frame >= EndFrame;
+        return newEvent;
+    }
+}
