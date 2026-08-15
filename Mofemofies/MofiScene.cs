@@ -3,7 +3,6 @@ using SkiaSharp;
 
 namespace Mofemofies;
 
-// Scenes only know channels.
 public sealed class MofiScene : IMofiDisplay, ICancelable, IDisposable
 {
     public long GlobalStartFrame { get; private set; }
@@ -12,11 +11,12 @@ public sealed class MofiScene : IMofiDisplay, ICancelable, IDisposable
     public bool IsFinished { get; set; }
     public List<MofiChannel> Channels { get; } = [];
 
-    public void Dispose()
+    internal MofiScene()
     {
-        Channels.ForEach(channel => ((IResettable)channel).Reset());
-        Channels.Clear();
+
     }
+
+    public void Dispose() => Channels.ForEach(channel => ((IResettable)channel).Reset());
 
     public IEnumerable<MofiChannel> GetChannels(string? name)
         => Channels.Where(channel => channel.Name is null
@@ -54,11 +54,15 @@ public sealed class MofiScene : IMofiDisplay, ICancelable, IDisposable
         {
             if (channel.QueryEvent(LocalFrame, out var currentEvent))
             {
+                currentEvent.StartFrame = LocalFrame;
                 ((IMofiDisplay)currentEvent).Load(LocalFrame);
             }
 
             if (currentEvent is not null && !currentEvent.IsFinished)
             {
+                currentEvent.Progress = currentEvent.Length.IsFinite
+                    ? (LocalFrame - currentEvent.StartFrame) / (double)(long)currentEvent.Length
+                    : null;
                 ((IMofiDisplay)currentEvent).Update(sender, LocalFrame);
             }
         }
@@ -88,4 +92,6 @@ public sealed class MofiSceneFactory : MofiFactory<MofiSceneFactory, MofiScene>
     {
         _creator = creator;
     }
+
+    protected override MofiScene Instantiate() => new();
 }

@@ -9,7 +9,13 @@ public class CWhenSuddenly : IMofiDisplay, IResettable
     public Func<bool>? Condition { get; set; }
     public Action? Execute { get; set; }
 
-    void IResettable.Reset() => _lastResult = false;
+    void IResettable.Reset()
+    {
+        _lastResult = false;
+
+        Condition = null;
+        Execute = null;
+    }
 
     public virtual void Update(DisplayCallStack sender, long frame)
     {

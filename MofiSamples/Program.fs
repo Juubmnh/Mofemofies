@@ -4,6 +4,7 @@ open nkast.Aether.Physics2D.Common;
 open nkast.Aether.Physics2D.Dynamics;
 open Mofemofies
 open Mofemofies.Components
+open Mofemofies.Data
 
 type GlowStyle = {
     GlowColor: SKColor
@@ -80,6 +81,8 @@ type MyPhysicsSystem() =
         Style = SKPaintStyle.Fill
     )
 
+    member val BallCount: int = 0 with get, set
+
     interface IMofiDisplay with
         member this.Load (frame: int64): unit = 
             world <- World(Vector2(0f, 9.8f))
@@ -122,7 +125,7 @@ type MyPhysicsSystem() =
 
                 Ball(body, radiusPx, colors[i % colors.Length])
 
-            balls <- [for i in 0..14 -> createBall i]
+            balls <- [for i in 1..this.BallCount -> createBall i]
 
         member this.Update (sender: DisplayCallStack, frame: int64): unit = 
             if world <> null then
@@ -151,21 +154,32 @@ type MyPhysicsSystem() =
 
 let movie = new MofiMovie()
 
-//let channel = new MofiChannel(600L)
-let channel = new MofiChannel()
+let smallChannel = MofiChannel(300L)
 
-let eventFactory = MofiEventFactory(0, Action<MofiEvent>(fun (event) ->
-    event.QueryComponent<MyPhysicsSystem>()
-    event.QueryComponent<CEveryGivenTime>(fun (comp) ->
+let smallEventFactory = MofiEventFactory(0, Action<MofiEvent>(fun event ->
+    event.QueryComponent<MyPhysicsSystem>(fun comp ->
+        comp.BallCount <- 5)
+    event.QueryComponent<CEveryGivenTime>(fun comp ->
         comp.Interval <- TimeSpan.FromSeconds 1.
         comp.Execute <- Action(fun () -> printfn "%A" movie.LastFrameMilliseconds))))
 
-channel.Subscribe eventFactory
+smallChannel.Subscribe smallEventFactory
 
-let sceneFactory = MofiSceneFactory(fun (scene) ->
-    scene.Channels.Add channel)
+let largeChannel = MofiChannel()
 
-movie.SceneFactories.Add sceneFactory
+let largeEventFactory = smallEventFactory.Inherit(Action<MofiEvent>(fun event ->
+    event.QueryComponent<MyPhysicsSystem>(fun comp ->
+        comp.BallCount <- 15)))
+
+largeChannel.Subscribe largeEventFactory
+
+movie.SceneFactories.Add(MofiSceneFactory(fun scene ->
+    scene.Channels.Add smallChannel))
+
+movie.SceneFactories.Add(MofiSceneFactory(fun scene ->
+    scene.Channels.Add largeChannel))
+
+ObjectPool.ShowDebugInfo <- true
 
 //movie.Mode <- MofiMode.Export
 movie.Run()

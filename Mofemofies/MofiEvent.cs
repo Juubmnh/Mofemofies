@@ -3,11 +3,19 @@ using SkiaSharp;
 
 namespace Mofemofies;
 
-// Treated as an integer interval [StartFrame, EndFrame).
 public sealed class MofiEvent : MofiObject<IMofiDisplay>, IMofiDisplay, ICancelable, IDisposable
 {
     internal Func<long, bool>? _finishPredicate;
+
+    public long StartFrame { get; internal set; }
+    public ExLong Length { get; internal set; }
+    public double? Progress { get; internal set; }
     public bool IsFinished { get; set; }
+
+    internal MofiEvent()
+    {
+
+    }
 
     public void Dispose() => ClearComponents();
 
@@ -22,7 +30,7 @@ public sealed class MofiEvent : MofiObject<IMofiDisplay>, IMofiDisplay, ICancela
 
     void IMofiDisplay.Update(DisplayCallStack sender, long frame)
     {
-        if (_finishPredicate(frame))
+        if (_finishPredicate!.Invoke(frame))
         {
             IsFinished = true;
             return;
@@ -44,6 +52,9 @@ public sealed class MofiEvent : MofiObject<IMofiDisplay>, IMofiDisplay, ICancela
     }
 }
 
+/// <summary>
+/// Treated as an integer interval [<see cref="MofiEventFactory.StartFrame"/>, <see cref="MofiEventFactory.EndFrame"/>).
+/// </summary>
 public sealed class MofiEventFactory : MofiFactory<MofiEventFactory, MofiEvent>
 {
     public static readonly MofiEventFactory MinValue = new(long.MinValue);
@@ -98,10 +109,13 @@ public sealed class MofiEventFactory : MofiFactory<MofiEventFactory, MofiEvent>
 
     public void SetCreator(Action<MofiEvent> creator) => _creator = creator;
 
+    protected override MofiEvent Instantiate() => new();
+
     public override MofiEvent Create()
     {
         var newEvent = base.Create();
         newEvent._finishPredicate = frame => frame >= EndFrame;
+        newEvent.Length = EndFrame.IsFinite ? (long)EndFrame - StartFrame - 1 : ExLong.PositiveInfinity;
         return newEvent;
     }
 }

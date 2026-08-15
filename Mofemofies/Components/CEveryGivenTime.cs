@@ -16,6 +16,9 @@ public class CEveryGivenTime : IMofiDisplay, IResettable
         {
             _cancellation.Cancel();
         }
+
+        Interval = default;
+        Execute = null;
     }
 
     [MemberNotNull(nameof(_cancellation))]

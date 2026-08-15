@@ -1,7 +1,12 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Mofemofies.Data;
 
+/// <summary>
+/// Classes implementing this interface can be automatically reset
+/// when returned to the <see cref="ObjectPool"/>.
+/// </summary>
 public interface IResettable
 {
     void Reset();
@@ -11,14 +16,18 @@ public static class ObjectPool
 {
     private static readonly ConcurrentDictionary<Type, ConcurrentBag<object>> _typedPools = [];
 
+    public static bool ShowDebugInfo { get; set; }
+
     public static T Rent<T>() where T : class, new()
     {
         var bag = _typedPools.GetOrAdd(typeof(T), []);
         if (!bag.TryTake(out var obj))
         {
             obj = new T();
+            Debug.WriteLineIf(ShowDebugInfo, $"[new] {typeof(T)}");
         }
 
+        Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(Rent)}] {typeof(T)}");
         return (T)obj;
     }
 
@@ -30,10 +39,12 @@ public static class ObjectPool
         if (obj is IResettable resettable)
         {
             resettable.Reset();
+            Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(IResettable.Reset)}] {obj.GetType()}");
         }
 
         var bag = _typedPools.GetOrAdd(typeof(T), []);
         bag.Add(obj);
+        Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(Return)}] {typeof(T)}");
     }
 
     public static void Retain<T>(int count) where T : class, new()
@@ -49,22 +60,14 @@ public static class ObjectPool
                     break;
                 }
             }
+
+            Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(Retain)}] {typeof(T)} (remove: {removeCount})");
         }
     }
 
     public static void Clear()
     {
-        foreach ((_, var bag) in _typedPools)
-        {
-            foreach (var obj in bag)
-            {
-                if (obj is IResettable resettable)
-                {
-                    resettable.Reset();
-                }
-            }
-        }
-
         _typedPools.Clear();
+        Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(Clear)}] {nameof(ObjectPool)}");
     }
 }

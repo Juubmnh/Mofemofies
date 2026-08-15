@@ -2,6 +2,10 @@
 
 namespace Mofemofies;
 
+/// <summary>
+/// Implementing this interface means you can push it onto the <see cref="DisplayCallStack"/>
+/// to wait for a possible cancellation.
+/// </summary>
 public interface ICancelable
 {
     bool IsFinished { get; set; }

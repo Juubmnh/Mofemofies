@@ -5,6 +5,12 @@ using System.Reflection;
 
 namespace Mofemofies;
 
+/// <summary>
+/// Offers basic component rental management.
+/// Please note that you should call <see cref="MofiObject{TComponent}.ClearComponents"/>
+/// to return the components back to the <see cref="ObjectPool"/> before the instance releases.
+/// </summary>
+/// <typeparam name="TComponent"></typeparam>
 public abstract class MofiObject<TComponent> where TComponent : class
 {
     protected readonly Dictionary<Type, TComponent> _components = [];

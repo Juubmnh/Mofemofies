@@ -8,6 +8,11 @@ public class FactoryTests
     {
         public string? Name { get; set; }
         public TimeSpan Time { get; set; }
+
+        internal MovieData()
+        {
+
+        }
     }
 
     public class MovieDataFactory : MofiFactory<MovieDataFactory, MovieData>
@@ -21,6 +26,8 @@ public class FactoryTests
         {
             _creator = creator;
         }
+
+        protected override MovieData Instantiate() => new();
     }
 
     [Fact]

@@ -51,7 +51,12 @@ public sealed class MofiChannel(string? name = null) : IResettable
         _ = _eventFactories.Add(factory);
     }
 
-    // Returning true when querying a new event.
+    /// <summary>
+    /// Returns true when querying a new event.
+    /// </summary>
+    /// <param name="frame"></param>
+    /// <param name="queriedEvent"></param>
+    /// <returns></returns>
     public bool QueryEvent(long frame, [NotNullWhen(true)] out MofiEvent? queriedEvent)
     {
         if (_lastQueriedFactory is not null

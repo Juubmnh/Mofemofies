@@ -2,6 +2,9 @@
 
 public readonly struct ExLong : IComparable<ExLong>, IEquatable<ExLong>
 {
+    public static readonly ExLong PositiveInfinity = new(false);
+    public static readonly ExLong NegativeInfinity = new(true);
+
     private readonly long? _value;
     private readonly bool _isNegative;
 
@@ -9,9 +12,6 @@ public readonly struct ExLong : IComparable<ExLong>, IEquatable<ExLong>
     public bool IsInfinite => _value is null;
     public bool IsPositiveInfinity => _value is null && !_isNegative;
     public bool IsNegativeInfinity => _value is null && _isNegative;
-
-    public static readonly ExLong PositiveInfinity = new(false);
-    public static readonly ExLong NegativeInfinity = new(true);
 
     public ExLong() : this(0)
     {

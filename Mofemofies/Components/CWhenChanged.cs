@@ -8,9 +8,16 @@ public class CWhenChanged : IMofiDisplay, IResettable
 
     public Func<object>? Selector { get; set; }
     public Action<object>? Execute { get; set; }
-    public EqualityComparer<object>? Comparer;
+    public EqualityComparer<object>? Comparer { get; set; }
 
-    void IResettable.Reset() => _lastValue = null;
+    void IResettable.Reset()
+    {
+        _lastValue = null;
+
+        Selector = null;
+        Execute = null;
+        Comparer = null;
+    }
 
     public virtual void Update(DisplayCallStack sender, long frame)
     {
