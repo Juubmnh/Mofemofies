@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Mofemofies.Data;
 
 /// <summary>
-/// Classes implementing this interface can be automatically reset
+/// Instances of class implementing this interface can be automatically reset
 /// when returned to the <see cref="ObjectPool"/>.
 /// </summary>
 public interface IResettable

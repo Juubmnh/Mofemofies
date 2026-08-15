@@ -11,7 +11,7 @@ public abstract class MofiFactory<TSelf, TTarget>
 
     /// <summary>
     /// When implementing this instantiation method, it is recommended that
-    /// you should hide the constructor in order to use factories to create instances.
+    /// you should hide the constructor in order to forcibly create instances through the factory.
     /// </summary>
     /// <returns></returns>
     protected abstract TTarget Instantiate();
