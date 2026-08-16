@@ -52,6 +52,20 @@ public sealed class MofiChannel(string? name = null) : IResettable
     }
 
     /// <summary>
+    /// Gets a view in which the <see cref="MofiEventFactory.StartFrame"/>s of the selected factories
+    /// are between <paramref name="lower"/> and <paramref name="upper"/>.
+    /// </summary>
+    /// <param name="lower">Null for the minimum boundary.</param>
+    /// <param name="upper">Null for the maximum boundary.</param>
+    /// <returns></returns>
+    public SortedSet<MofiEventFactory> SelectBetween(long? lower, long? upper)
+    {
+        var lowerValue = lower is null ? MofiEventFactory.MinValue : new(lower.Value);
+        var upperValue = upper is null ? MofiEventFactory.MaxValue : new(upper.Value);
+        return _eventFactories.GetViewBetween(lowerValue, upperValue);
+    }
+
+    /// <summary>
     /// Returns true when querying a new event.
     /// </summary>
     /// <param name="frame"></param>

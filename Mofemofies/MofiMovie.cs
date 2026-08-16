@@ -75,11 +75,6 @@ public sealed class MofiMovie : IDisposable
         _ffmpeg?.Dispose();
     }
 
-    public static void Initialize()
-    {
-
-    }
-
     [MemberNotNull(nameof(PreviewWindow))]
     public void Run()
     {

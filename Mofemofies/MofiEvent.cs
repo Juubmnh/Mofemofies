@@ -63,24 +63,7 @@ public sealed class MofiEventFactory : MofiFactory<MofiEventFactory, MofiEvent>
     public long StartFrame { get; set; }
     public ExLong EndFrame { get; set; }
 
-    public MofiEventFactory()
-    {
-        StartFrame = default;
-        EndFrame = ExLong.PositiveInfinity;
-    }
-
-    public MofiEventFactory(long startFrame, long? endFrame = null)
-    {
-        if (endFrame is not null && startFrame >= endFrame)
-        {
-            throw new ArgumentException($"{nameof(startFrame)} must be less than {nameof(endFrame)}.");
-        }
-
-        StartFrame = startFrame;
-        EndFrame = endFrame ?? ExLong.PositiveInfinity;
-    }
-
-    private MofiEventFactory(long startFrame, ExLong endFrame, Action<MofiEvent> creator)
+    private MofiEventFactory(long startFrame, ExLong endFrame, Action<MofiEvent>? creator)
     {
         if (startFrame >= endFrame)
         {
@@ -93,14 +76,32 @@ public sealed class MofiEventFactory : MofiFactory<MofiEventFactory, MofiEvent>
         _creator = creator;
     }
 
-    public MofiEventFactory(long startFrame, long endFrame, Action<MofiEvent> creator)
+    public MofiEventFactory(long startFrame, long endFrame, Action<MofiEvent>? creator = null)
         : this(startFrame, (ExLong)endFrame, creator)
     {
 
     }
 
-    public MofiEventFactory(long startFrame, Action<MofiEvent> creator)
+    public MofiEventFactory(long startFrame, Action<MofiEvent>? creator = null)
         : this(startFrame, ExLong.PositiveInfinity, creator)
+    {
+
+    }
+
+    public MofiEventFactory(long startFrame, long endFrame, MofiEventFactory source)
+        : this(startFrame, endFrame, source._creator)
+    {
+
+    }
+
+    public MofiEventFactory(long startFrame, MofiEventFactory source)
+        : this(startFrame, ExLong.PositiveInfinity, source._creator)
+    {
+
+    }
+
+    public MofiEventFactory()
+        : this(default, ExLong.PositiveInfinity, null)
     {
 
     }
