@@ -7,7 +7,7 @@ public class CWhenChanged : IMofiDisplay, IResettable
     protected object? _lastValue;
 
     public Func<object>? Selector { get; set; }
-    public Action<object>? Execute { get; set; }
+    public Action<object>? Executor { get; set; }
     public EqualityComparer<object>? Comparer { get; set; }
 
     void IResettable.Reset()
@@ -15,13 +15,13 @@ public class CWhenChanged : IMofiDisplay, IResettable
         _lastValue = null;
 
         Selector = null;
-        Execute = null;
+        Executor = null;
         Comparer = null;
     }
 
     public virtual void Update(DisplayCallStack sender, long frame)
     {
-        if (Selector is null || Execute is null)
+        if (Selector is null || Executor is null)
         {
             return;
         }
@@ -29,7 +29,7 @@ public class CWhenChanged : IMofiDisplay, IResettable
         var value = Selector();
         if (Comparer is null ? !value.Equals(_lastValue) : !Comparer.Equals(value, _lastValue))
         {
-            Execute.Invoke(value);
+            Executor.Invoke(value);
             _lastValue = value;
         }
     }

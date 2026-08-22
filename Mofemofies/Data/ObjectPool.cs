@@ -55,7 +55,15 @@ public static class ObjectPool
             var removeCount = bag.Count - count;
             for (var i = 0; i < removeCount; i++)
             {
-                if (!bag.TryTake(out _))
+                if (bag.TryTake(out var obj))
+                {
+                    if (obj is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                        Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(IDisposable.Dispose)}] {obj.GetType()}");
+                    }
+                }
+                else
                 {
                     break;
                 }
@@ -67,6 +75,18 @@ public static class ObjectPool
 
     public static void Clear()
     {
+        foreach (var pool in _typedPools)
+        {
+            foreach (var obj in pool.Value)
+            {
+                if (obj is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                    Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(IDisposable.Dispose)}] {obj.GetType()}");
+                }
+            }
+        }
+
         _typedPools.Clear();
         Debug.WriteLineIf(ShowDebugInfo, $"[{nameof(Clear)}] {nameof(ObjectPool)}");
     }

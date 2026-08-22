@@ -29,7 +29,7 @@ public sealed class MofiMovie : IDisposable
     public string? FFmpegArguments { get; set; }
     public string OutputPath { get; set; } = "output.mp4";
     public Vector2D<int> CanvasSize { get; set; } = new(1920, 1080);
-    public Fraction FPS { get; set; } = 60;
+    public long FPS { get; set; } = 60;
     public double LastFrameMilliseconds { get; private set; }
 
     public IWindow? PreviewWindow { get; private set; }

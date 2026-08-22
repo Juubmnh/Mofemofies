@@ -81,7 +81,24 @@ type MyPhysicsSystem() =
         Style = SKPaintStyle.Fill
     )
 
+    let textPaint = new SKPaint(
+        IsAntialias = true,
+        Color = SKColors.White
+    )
+
+    let textFont = new SKFont(
+        Typeface = SKTypeface.FromFamilyName "Consolas",
+        Size = 30f
+    )
+
     member val BallCount: int = 0 with get, set
+    member val LastFrameMilliseconds = 0.0 with get, set
+
+    interface IDisposable with
+        member this.Dispose (): unit = 
+            ballPaint.Dispose()
+            textPaint.Dispose()
+            textFont.Dispose()
 
     interface IMofiDisplay with
         member this.Load (frame: int64): unit = 
@@ -152,16 +169,20 @@ type MyPhysicsSystem() =
                     (float32(ball.radiusPx))
                     ({ style with GlowColor = ball.color; CoreColor = ball.color})
 
+            let text = $"LastFrameMilliseconds: {this.LastFrameMilliseconds}"
+            canvas.DrawText(text, 10f, 30f, SKTextAlign.Left, textFont, textPaint)
+
 let movie = new MofiMovie()
 
 let smallChannel = MofiChannel(300L)
 
 let smallEventFactory = MofiEventFactory(0, Action<MofiEvent>(fun event ->
-    event.QueryComponent<MyPhysicsSystem>(fun comp ->
-        comp.BallCount <- 5)
-    event.QueryComponent<CEveryGivenTime>(fun comp ->
-        comp.Interval <- TimeSpan.FromSeconds 1.
-        comp.Execute <- Action(fun () -> printfn "%A" movie.LastFrameMilliseconds))))
+    event.QueryComponent<MyPhysicsSystem>(fun physics ->
+        physics.BallCount <- 5
+        event.QueryComponent<CEveryGivenTime>(fun comp ->
+            comp.Interval <- TimeSpan.FromSeconds 1.
+            comp.Executor <- Action(fun () -> physics.LastFrameMilliseconds <- movie.LastFrameMilliseconds)))))
+        
 
 smallChannel.Subscribe smallEventFactory
 
@@ -184,3 +205,5 @@ ObjectPool.ShowDebugInfo <- true
 //movie.Mode <- MofiMode.Export
 movie.Run()
 movie.Dispose()
+
+ObjectPool.Clear()
