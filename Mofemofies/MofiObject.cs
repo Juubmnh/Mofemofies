@@ -60,7 +60,7 @@ public abstract class MofiObject<TComponent> where TComponent : class
 
     public void ClearComponents()
     {
-        foreach ((var key, var value) in _components)
+        foreach (var (key, value) in _components)
         {
             var remove = _delegateCache.GetOrAdd(key, BuildReturnDelegate);
             remove.Invoke(value);

@@ -3,6 +3,6 @@
     <File Path=".editorconfig" />
   </Folder>
   <Project Path="Mofemofies/Mofemofies.csproj" />
-  <Project Path="MofemofiesTests/MofemofiesTests.csproj" Id="41cdb4c9-b1d2-40e3-9acd-ca9e602598e9" />
+  <Project Path="MofiTests/MofiTests.csproj" Id="41cdb4c9-b1d2-40e3-9acd-ca9e602598e9" />
   <Project Path="MofiSamples/MofiSamples.fsproj" Id="996859cc-4c09-4934-ad6a-cbd51c981760" />
 </Solution>

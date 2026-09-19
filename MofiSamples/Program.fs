@@ -1,10 +1,28 @@
 ﻿open System
+open System.IO
 open SkiaSharp
-open nkast.Aether.Physics2D.Common;
-open nkast.Aether.Physics2D.Dynamics;
+open nkast.Aether.Physics2D.Common
+open nkast.Aether.Physics2D.Dynamics
 open Mofemofies
 open Mofemofies.Components
 open Mofemofies.Data
+
+type FilmDesc() =
+    class
+        inherit Scriptable("FilmDesc")
+
+        member val Width: int = 1920 with get, set
+        member val Height: int = 1080 with get, set
+        member val FrameRate: float32 = 60f with get, set
+        member val DurationSeconds: float32 = 10f with get, set
+    end
+
+let filmDesc = FilmDesc()
+
+let yaml = Scriptor.Serializer.Serialize(filmDesc)
+File.WriteAllText("filmDesc.yaml", yaml)
+
+let deserializedFilmDesc = Scriptor.Deserializer.Deserialize<Scriptable>(yaml)
 
 type GlowStyle = {
     GlowColor: SKColor

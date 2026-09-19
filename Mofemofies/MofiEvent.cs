@@ -22,7 +22,7 @@ public sealed class MofiEvent : MofiObject<IMofiDisplay>, IMofiDisplay, ICancela
     void IMofiDisplay.Load(long frame)
     {
         IsFinished = false;
-        foreach ((_, var component) in _components)
+        foreach (var (_, component) in _components)
         {
             component.Load(frame);
         }
@@ -37,7 +37,7 @@ public sealed class MofiEvent : MofiObject<IMofiDisplay>, IMofiDisplay, ICancela
         }
 
         sender.Push(this);
-        foreach ((_, var component) in _components)
+        foreach (var (_, component) in _components)
         {
             component.Update(sender, frame);
         }
@@ -45,7 +45,7 @@ public sealed class MofiEvent : MofiObject<IMofiDisplay>, IMofiDisplay, ICancela
 
     void IMofiDisplay.Render(SKCanvas canvas)
     {
-        foreach ((_, var component) in _components)
+        foreach (var (_, component) in _components)
         {
             component.Render(canvas);
         }

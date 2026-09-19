@@ -91,9 +91,9 @@ public static class CurvedValue
     public static Curve Polynomial(params double[] ascendingFactors)
         => t =>
         {
-            (_, var acc) = ascendingFactors.Aggregate((0, 0.0), (tuple, factor) =>
+            var (_, acc) = ascendingFactors.Aggregate((0, 0.0), (tuple, factor) =>
             {
-                (var exp, var acc) = tuple;
+                var (exp, acc) = tuple;
                 var term = factor * Math.Pow(t, exp);
                 return (exp + 1, acc + term);
             });

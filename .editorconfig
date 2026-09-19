@@ -3,6 +3,9 @@
 # SA1000: Keywords should be spaced correctly
 dotnet_diagnostic.SA1000.severity = none
 
+# SA1009: Closing parenthesis should be spaced correctly
+dotnet_diagnostic.SA1009.severity = none
+
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none
 
