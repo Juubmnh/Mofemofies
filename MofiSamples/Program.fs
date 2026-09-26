@@ -19,57 +19,10 @@ type FilmDesc() =
 
 let filmDesc = FilmDesc()
 
-let yaml = Scriptor.Serializer.Serialize(filmDesc)
+let yaml = Scriptor.Serializer.SerializeAll([filmDesc; filmDesc])
 File.WriteAllText("filmDesc.yaml", yaml)
 
-let deserializedFilmDesc = Scriptor.Deserializer.Deserialize<Scriptable>(yaml)
-
-type GlowStyle = {
-    GlowColor: SKColor
-    GlowRadius: float32
-    CoreColor: SKColor
-    BlendAdditive: bool
-}
-
-module SkiaGlow =
-    let drawGlowingCircle (canvas: SKCanvas) (center: SKPoint) (radius: float32) (style: GlowStyle) =
-        use glowPaint = new SKPaint(
-            IsAntialias = true,
-            Color = style.GlowColor,
-            Style = SKPaintStyle.Fill,
-            MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, style.GlowRadius)
-        )
-        
-        if style.BlendAdditive then
-            glowPaint.BlendMode <- SKBlendMode.Plus
-
-        use corePaint = new SKPaint(
-            IsAntialias = true,
-            Color = style.CoreColor,
-            Style = SKPaintStyle.Fill
-        )
-
-        canvas.DrawCircle(center, radius, glowPaint)
-        canvas.DrawCircle(center, radius * 0.9f, corePaint)
-
-    let drawGlowingPath (canvas: SKCanvas) (path: SKPath) (strokeWidth: float32) (style: GlowStyle) =
-        use glowPaint = new SKPaint(
-            IsAntialias = true,
-            Color = style.GlowColor,
-            Style = SKPaintStyle.Stroke,
-            StrokeWidth = strokeWidth,
-            MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, style.GlowRadius)
-        )
-
-        use corePaint = new SKPaint(
-            IsAntialias = true,
-            Color = style.CoreColor,
-            Style = SKPaintStyle.Stroke,
-            StrokeWidth = strokeWidth * 0.5f
-        )
-
-        canvas.DrawPath(path, glowPaint)
-        canvas.DrawPath(path, corePaint)
+let deserializedFilmDesc = Scriptor.Deserializer.DeserializeAll<Scriptable>(yaml)
 
 [<Measure>] type px
 [<Measure>] type m
@@ -97,6 +50,15 @@ type MyPhysicsSystem() =
     let ballPaint = new SKPaint(
         IsAntialias = true,
         Style = SKPaintStyle.Fill
+    )
+
+    let glowPaint = new SKPaint(
+        IsAntialias = true,
+        Style = SKPaintStyle.Fill,
+        BlendMode = SKBlendMode.Plus,
+        ImageFilter = SKImageFilter.CreateBlur(15f, 15f),
+        StrokeCap = SKStrokeCap.Round,
+        StrokeJoin = SKStrokeJoin.Round
     )
 
     let textPaint = new SKPaint(
@@ -169,23 +131,15 @@ type MyPhysicsSystem() =
         member this.Render (canvas: SKCanvas): unit = 
             canvas.Clear(SKColor(20uy, 20uy, 31uy))
 
-            let style = {
-                GlowColor = SKColor(0uy, 230uy, 255uy, 255uy)
-                GlowRadius = 15f
-                CoreColor = SKColors.White
-                BlendAdditive = true
-            }
-
             for ball in balls do
                 ballPaint.Color <- ball.color
+                glowPaint.Color <- ball.color
                 
                 let px = ball.body.Position.X * 1f<m> * simToDisplay
                 let py = ball.body.Position.Y * 1f<m> * simToDisplay
                 
-                SkiaGlow.drawGlowingCircle canvas
-                    (SKPoint(float32(px), float32(py)))
-                    (float32(ball.radiusPx))
-                    ({ style with GlowColor = ball.color; CoreColor = ball.color})
+                canvas.DrawCircle(float32(px), float32(py), float32(ball.radiusPx), glowPaint)
+                canvas.DrawCircle(float32(px), float32(py), float32(ball.radiusPx), ballPaint)
 
             let text = $"LastFrameMilliseconds: {this.LastFrameMilliseconds}"
             canvas.DrawText(text, 10f, 30f, SKTextAlign.Left, textFont, textPaint)

@@ -40,8 +40,13 @@ public static class CurvedValue
     public static Curve Constant(double c)
         => t => c;
 
-    public static Curve Pow(double exp)
-        => t => Math.Pow(t, exp);
+    /// <summary>
+    /// 𝒇(𝒕)=𝒕ⁿ.
+    /// </summary>
+    /// <param name="n"></param>
+    /// <returns></returns>
+    public static Curve Pow(double n)
+        => t => Math.Pow(t, n);
 
     /// <summary>
     /// 𝒇(𝒕)=𝒌𝒕+𝒃.
@@ -49,7 +54,7 @@ public static class CurvedValue
     /// <param name="k"></param>
     /// <param name="b"></param>
     /// <returns></returns>
-    public static Curve Linear(double k, double b)
+    public static Curve Linear(double k = 1, double b = 0)
         => t => k * t + b;
 
     /// <summary>
@@ -69,7 +74,7 @@ public static class CurvedValue
     /// <param name="x0"></param>
     /// <param name="y0"></param>
     /// <returns></returns>
-    public static Curve QuadraticVertexForm(double a, double x0, double y0)
+    public static Curve QuadraticVertexForm(double a = 1, double x0 = 0, double y0 = 0)
         => t => a * Math.Pow(t - x0, 2) + y0;
 
     /// <summary>
@@ -135,7 +140,7 @@ public static class CurvedValue
     /// <param name="x0"></param>
     /// <param name="y0"></param>
     /// <returns></returns>
-    public static Curve Inverse(double k, double x0, double y0)
+    public static Curve Inverse(double k = 1, double x0 = 0, double y0 = 0)
         => t => k / (t - x0) + y0;
 
     /// <summary>
@@ -157,7 +162,7 @@ public static class CurvedValue
     /// <param name="phi"></param>
     /// <param name="k"></param>
     /// <returns></returns>
-    public static Curve Sin(double a, double omega, double phi, double k)
+    public static Curve Sin(double a = 1, double omega = 1, double phi = 0, double k = 0)
         => t => a * Math.Sin(omega * t + phi) + k;
 
     /// <summary>
@@ -168,12 +173,22 @@ public static class CurvedValue
     /// <param name="phi"></param>
     /// <param name="k"></param>
     /// <returns></returns>
-    public static Curve Cos(double a, double omega, double phi, double k)
+    public static Curve Cos(double a = 1, double omega = 1, double phi = 0, double k = 0)
         => t => a * Math.Cos(omega * t + phi) + k;
 
+    /// <summary>
+    /// 𝒇(𝒕)=𝒆𝒙𝒑(𝒕).
+    /// </summary>
+    /// <param name="baseNum"></param>
+    /// <returns></returns>
     public static Curve Exp(double baseNum = double.E)
         => t => Math.Pow(baseNum, t);
 
+    /// <summary>
+    /// 𝒇(𝒕)=𝒍𝒐𝒈(𝒕).
+    /// </summary>
+    /// <param name="baseNum"></param>
+    /// <returns></returns>
     public static Curve Log(double baseNum = double.E)
         => t => Math.Log(t, baseNum);
 
